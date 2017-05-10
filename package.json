@@ -23,6 +23,7 @@
   "dependencies": {
     "lodash": "^4.17.4",
     "numjs": "^0.13.1",
-    "svg.js": "^2.6.1"
+    "svg.js": "^2.6.1",
+    "three": "^0.85.2"
   }
 }
