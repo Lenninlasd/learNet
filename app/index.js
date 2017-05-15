@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import nj from 'numjs';
-
-const matSize = [10,30];
+const t0 = performance.now();
+const matSize = [50,100];
 const features = nj.random(matSize);
 const style = {
-    size: 40,
+    size: 10,
     fill: 0xffffff
 }
 
@@ -12,7 +12,8 @@ let camera, scene, renderer;
 
 init();
 animate();
-
+const t1 = performance.now();
+console.log(t1 - t0);
 
 function init() {
     const aspect = window.innerWidth / window.innerHeight;
@@ -41,10 +42,10 @@ function init() {
     container.appendChild(renderer.domElement);
 }
 
-function rect(geometry, style, position = {x: 0, y: 0}) {
+function rect(feature, geometry, style, position = {x: 0, y: 0}) {
     const s = style;
-    const object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({
-        color: s.fill*Math.random()
+    const object = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
+        color: s.fill*feature
     }));
     object.position.x = position.x;
     object.position.y = position.y;
@@ -61,7 +62,7 @@ function createMatrix(features, style, scene) {
             let feature = featuresArray[i][j];
             let x = j*style.size - window.innerWidth/2;
             let y = window.innerHeight/2 - i*style.size;
-            scene.add(rect(geometry, style, {x: x,  y: y}));
+            scene.add(rect(feature, geometry, style, {x: x,  y: y}));
         }
     }
 }
