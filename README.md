@@ -4,4 +4,4 @@
 npm install
 npm run serve
 ```
-![image](https://cloud.githubusercontent.com/assets/7197750/26062045/55cbe62c-394f-11e7-9d7a-30a16d78edb0.png)
+<img width="800" src="https://cloud.githubusercontent.com/assets/7197750/26277619/c01fadba-3d50-11e7-8091-2305171376ac.png">
