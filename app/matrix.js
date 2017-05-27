@@ -6,9 +6,8 @@ export default function MatrixGL(features, group, style) {
     const params = createMatrix(features, group, style);
 
     return {
-        transposed:  function () {
-            transposed(params);
-        }
+        transposed: () => { transposed(params) },
+        rotate: () => { rotate(params) }
     };
 }
 
@@ -64,8 +63,8 @@ function rotate(params) {
     for (let i = 0; i < params.shape[0]; i++) {
         for (let j = params.shape[1]; j > 0; j--) {
             new TWEEN.Tween(params.list[k].position).to({
-                x: i * params.style.size - window.innerWidth/2,
-                y: window.innerHeight/2 - j * params.style.size,
+                x: i * params.style.size - params.style.startPoint[0],
+                y: params.style.startPoint[1] - j * params.style.size,
                 z: 0
             }, 3000).easing(TWEEN.Easing.Exponential.InOut).start();
             k++;
