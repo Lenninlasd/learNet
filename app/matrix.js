@@ -6,8 +6,16 @@ export default function MatrixGL(features, group, style) {
     const params = createMatrix(features, group, style);
 
     return {
-        transposed: () => { transposed(params) },
-        rotate: () => { rotate(params) }
+        params,
+        transposed: () => {
+            return transposed(params);
+        },
+        rotate: () => {
+            rotate(params);
+        },
+        dot: (b_matrix) => {
+            dot(params, b_matrix);
+        }
     };
 }
 
@@ -39,6 +47,14 @@ function rect(feature, geometry, style, position = {x: 0, y: 0}) {
     return object;
 }
 
+/*
+** Setters
+*/
+
+
+/*
+** Animations
+*/
 function xLineFormation() {
     for (var i = 0; i < list.length; i++) {
         new TWEEN.Tween(list[i].position).to({
@@ -54,7 +70,7 @@ function yLineFormation() {
             x: - window.innerWidth/2,
             y: window.innerHeight/2 - i * style.size,
             z: 0
-        }, 10000).easing(TWEEN.Easing.Exponential.InOut).start();
+        }, 1000).easing(TWEEN.Easing.Exponential.InOut).start();
     }
 }
 
@@ -74,14 +90,57 @@ function rotate(params) {
 
 function transposed(params) {
     let k = 0;
+    const tweenSquarsePosition = [];
     for (let i = 0; i < params.shape[0]; i++) {
         for (let j = 0; j < params.shape[1]; j++) {
-            new TWEEN.Tween(params.list[k].position).to({
+            let tweenObj = new TWEEN.Tween(params.list[k].position).to({
                 x: i * params.style.size - params.style.startPoint[0],
                 y: params.style.startPoint[1] - j * params.style.size,
                 z: 0
-            }, 2000).easing(TWEEN.Easing.Exponential.InOut).start();
+            }, 2000).easing(TWEEN.Easing.Exponential.InOut);
+            tweenSquarsePosition.push(tweenObj);
             k++;
         }
     }
+    tweenSquarsePosition.start = function () {
+        tweenSquarsePosition.map( (tweenObj) => {
+            tweenObj.start();
+        });
+    }
+    return tweenSquarsePosition;
+}
+
+function separate(params, pad = [0, 0]) {
+    let k = 0;
+    const tweenSquarsePosition = [];
+    for (let i = 0; i < params.shape[0]; i++) {
+        for (let j = 0; j < params.shape[1]; j++) {
+            let tweenObj = new TWEEN.Tween(params.list[k].position).to({
+                x: j * (params.style.size + pad[0]) - params.style.startPoint[0],
+                y: params.style.startPoint[1] - i * (params.style.size + pad[1]),
+                z: 0
+            }, 2000).easing(TWEEN.Easing.Exponential.InOut);
+            tweenSquarsePosition.push(tweenObj);
+            k++;
+        }
+    }
+    tweenSquarsePosition.start = function () {
+        tweenSquarsePosition.map( (tweenObj) => {
+            tweenObj.start();
+        });
+    }
+    return tweenSquarsePosition;
+}
+
+function dot(params, b) {
+    const tweenArray = separate(params, [b.params.style.size + 10, 0]);
+
+    b.params.style.startPoint = [
+        params.style.startPoint[0] - b.params.style.size,
+        params.style.startPoint[1]
+    ];
+
+    const B_MatrixTweenArray = b.transposed();
+    tweenArray[0].chain(B_MatrixTweenArray);
+    tweenArray.start();
 }

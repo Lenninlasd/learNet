@@ -7,20 +7,21 @@ const group = new THREE.Object3D();
 init(group).animate();
 
 
-const matSize = [60,30];
-const features = nj.random(matSize);
+const features = nj.random([1, 4]);
+
+const weights = nj.random([4, 3]);
 // Create Geometry
 const mtrx = MatrixGL(features, group, {
-    size: 9,
+    size: 50,
     fill: 0xffffff,
-    startPoint: [window.innerWidth/2, window.innerHeight/2]
+    startPoint: [window.innerWidth/2, window.innerHeight/2 - 250]
 });
 
-const mtrx2 = MatrixGL(features, group, {
-    size: 5,
+const mtrx2 = MatrixGL(weights, group, {
+    size: 50,
     fill: 0xffffff,
-    startPoint: [window.innerWidth/2, 0]
+    startPoint: [window.innerWidth/2 - 250, window.innerHeight/2]
 });
 
-setTimeout(mtrx.transposed, 1500);
-setTimeout(mtrx2.rotate, 2000);
+mtrx2.dot(mtrx);
+// setTimeout(mtrx2.transposed, 2000);
