@@ -19,7 +19,7 @@ const mtrx = MatrixGL(features, group, {
 
 const mtrx2 = MatrixGL(weights, group, {
     size: 50,
-    fill: 0xffffff,
+    fill: 0x111111,
     startPoint: [window.innerWidth/2 - 250, window.innerHeight/2]
 });
 

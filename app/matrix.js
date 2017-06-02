@@ -10,11 +10,9 @@ export default function MatrixGL(features, group, style) {
         transposed: () => { return transposed(params) },
         rotate: () => rotate(params),
         dot: b_matrix => dot(params, b_matrix),
-        duplicate: () => { return duplicateMatrixMesh(group, params) }
+        clone: () => { return cloneMatrix(features, group, style) }
     };
 }
-
-// TODO: create duplicate matrix
 
 function createMatrix(features, group, style) {
     const shape = features.shape.length === 1 ? [features.shape, 1] : features.shape;
@@ -34,23 +32,6 @@ function createMatrix(features, group, style) {
     return { list, shape, style };
 }
 
-function duplicateMatrixMesh(group, params) {
-    const clonedList = params.list.map(function (mesh) {
-        let meshCloned = mesh.clone();
-        group.add(meshCloned);
-        return meshCloned;
-    });
-    const newParams = {
-        list: clonedList,
-        shape: params.shape,
-        style: params.style
-    };
-    return {
-        params: newParams,
-        transposed: () => { return transposed(newParams) }
-    };
-}
-
 function rect(feature, geometry, style, position = {x: 0, y: 0}) {
     const s = style;
     const object = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
@@ -59,6 +40,11 @@ function rect(feature, geometry, style, position = {x: 0, y: 0}) {
     object.position.x = position.x;
     object.position.y = position.y;
     return object;
+}
+
+function cloneMatrix(features, group, style) {
+    const newStyle = Object.assign({}, style);
+    return MatrixGL(features, group, newStyle);
 }
 
 /*
@@ -111,7 +97,7 @@ function transposed(params) {
                 x: i * params.style.size - params.style.startPoint[0],
                 y: params.style.startPoint[1] - j * params.style.size,
                 z: 0
-            }, 2000).easing(TWEEN.Easing.Exponential.InOut);
+            }, 4000).easing(TWEEN.Easing.Exponential.InOut);
             tweenSquarsePosition.push(tweenObj);
             k++;
         }
@@ -149,21 +135,27 @@ function separate(params, pad = [0, 0]) {
 function dot(params, b) {
     const tweenArray = separate(params, [b.params.style.size + 10, 0]);
 
-    const B_duplicate = b.duplicate();
-    const B_transpodse = B_duplicate.transposed();
-    b.params.style.startPoint = [
+    const B_duplicate = b.clone();
+    const C_duplicate = b.clone();
+    const D_duplicate = b.clone();
+
+    D_duplicate.params.style.startPoint = [
         params.style.startPoint[0] - b.params.style.size,
         params.style.startPoint[1]
     ];
 
     B_duplicate.params.style.startPoint = [
-        params.style.startPoint[0] - b.params.style.size,
+        params.style.startPoint[0] - b.params.style.size*3 - 10,
         params.style.startPoint[1]
     ];
-    const B_MatrixTweenArray = b.transposed();
+    C_duplicate.params.style.startPoint = [
+        params.style.startPoint[0] - b.params.style.size*5 - 20,
+        params.style.startPoint[1]
+    ];
+    const B_transposed = B_duplicate.transposed();
+    const D_transposed = D_duplicate.transposed();
+    const C_transposed = C_duplicate.transposed();
 
-    tweenArray[0].chain(B_MatrixTweenArray, B_transpodse);
+    tweenArray[0].chain(D_transposed, B_transposed, C_transposed);
     tweenArray.start();
-
-    // b.duplicate();
 }
