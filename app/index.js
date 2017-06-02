@@ -1,27 +1,26 @@
 import * as THREE from 'three';
 import nj from 'numjs';
-import MatrixGL from './matrix';
+import MatrixGL from './matrix/matrix';
 import init from './3Denv';
 
 const group = new THREE.Object3D();
 init(group).animate();
 
 
-const features = nj.random([1, 4]);
+const features = nj.random([1, 5]);
 
-const weights = nj.random([4, 3]);
+const weights = nj.random([5, 4]);
 // Create Geometry
 const mtrx = MatrixGL(features, group, {
-    size: 50,
+    size: 30,
     fill: 0xffffff,
     startPoint: [window.innerWidth/2, window.innerHeight/2 - 250]
 });
 
 const mtrx2 = MatrixGL(weights, group, {
-    size: 50,
+    size: 30,
     fill: 0x111111,
     startPoint: [window.innerWidth/2 - 250, window.innerHeight/2]
 });
 
 mtrx2.dot(mtrx);
-// setTimeout(mtrx2.transposed, 2000);
