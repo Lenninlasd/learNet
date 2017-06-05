@@ -7,18 +7,18 @@ const group = new THREE.Object3D();
 init(group).animate();
 
 
-const features = nj.random([1, 5]);
+const features = nj.random([1, 50]);
 
-const weights = nj.random([5, 4]);
+const weights = nj.random([50, 30]);
 // Create Geometry
 const mtrx = MatrixGL(features, group, {
-    size: 30,
+    size: 4,
     fill: 0xffffff,
     startPoint: [window.innerWidth/2, window.innerHeight/2 - 250]
 });
 
 const mtrx2 = MatrixGL(weights, group, {
-    size: 30,
+    size: 4,
     fill: 0x111111,
     startPoint: [window.innerWidth/2 - 250, window.innerHeight/2]
 });

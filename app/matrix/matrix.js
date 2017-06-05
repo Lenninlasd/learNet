@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as animation from './animations';
+import nj from 'numjs';
 
 export default function MatrixGL(features, group, style) {
     const params = createMatrix(features, group, style);
@@ -9,7 +10,11 @@ export default function MatrixGL(features, group, style) {
         transposed: () => { return animation.transposed(params) },
         rotate: () => animation.rotate(params),
         dot: b_matrix => animation.dot(params, b_matrix),
-        clone: () => { return cloneMatrix(features, group, style) },
+        clone: n => { return cloneMatrix(features, group, style, n) },
+        xLineFormation: () => animation.xLineFormation(params),
+        yLineFormation: () => animation.yLineFormation(params),
+        separate: pad => animation.separate(params, pad),
+        plainX: () => animation.plainX(params),
 
         setStartPoint: (arr) => {
             if (arr.length === 2) params.style.startPoint = arr;
@@ -45,9 +50,17 @@ function rect(feature, geometry, style, position = {x: 0, y: 0}) {
     return object;
 }
 
-function cloneMatrix(features, group, style) {
+function cloneMatrix(features, group, style, nDuplicate = 1) {
+    // shape = (1, 4) =>
+    const arrayList = [];
+    for (let i = 0; i < nDuplicate - 1; i++) {
+        arrayList.push(features.clone());
+    }
+    const cloneFeatures = nj.concatenate(features, ...arrayList)
+        .reshape((nDuplicate) * features.shape[0], features.shape[1]);
+
     const newStyle = Object.assign({}, style);
-    return MatrixGL(features, group, newStyle);
+    return MatrixGL(cloneFeatures, group, newStyle);
 }
 
 /*

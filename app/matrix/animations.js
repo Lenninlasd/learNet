@@ -1,25 +1,42 @@
 import TWEEN from 'tween.js';
-export { rotate,  transposed, separate, dot };
+export { rotate,  transposed, separate, dot, yLineFormation, xLineFormation, plainX };
 /*
 ** Animations
 */
-function xLineFormation() {
-    for (var i = 0; i < list.length; i++) {
-        new TWEEN.Tween(list[i].position).to({
-            x: i * style.size - window.innerWidth/2,
-            y: window.innerHeight/2,
+function xLineFormation(params) {
+    const tweenSquarsePosition = [];
+    for (var i = 0; i < params.list.length; i++) {
+        let tweenObj = new TWEEN.Tween(params.list[i].position).to({
+            x: - params.style.startPoint[0],
+            y: params.style.startPoint[1],
             z: 0
-        }, 4000).easing(TWEEN.Easing.Exponential.InOut).start();
+        }, 1000).easing(TWEEN.Easing.Exponential.InOut);
+        tweenSquarsePosition.push(tweenObj);
     }
+    tweenSquarsePosition.start = function () {
+        tweenSquarsePosition.map( (tweenObj) => {
+            tweenObj.start();
+        });
+    }
+    return tweenSquarsePosition;
 }
-function yLineFormation() {
-    for (var i = 0; i < list.length; i++) {
-        new TWEEN.Tween(list[i].position).to({
-            x: - window.innerWidth/2,
-            y: window.innerHeight/2 - i * style.size,
+function yLineFormation(params) {
+    const tweenSquarsePosition = [];
+    for (var i = 0; i < params.list.length; i++) {
+        let tweenObj = new TWEEN.Tween(params.list[i].position).to({
+            x: - params.style.startPoint[0],
+            y: params.style.startPoint[1] - i * params.style.size,
             z: 0
-        }, 1000).easing(TWEEN.Easing.Exponential.InOut).start();
+        }, 1000).easing(TWEEN.Easing.Exponential.InOut);
+        tweenSquarsePosition.push(tweenObj);
     }
+
+    tweenSquarsePosition.start = function () {
+        tweenSquarsePosition.map( (tweenObj) => {
+            tweenObj.start();
+        });
+    }
+    return tweenSquarsePosition;
 }
 
 function rotate(params) {
@@ -39,13 +56,29 @@ function rotate(params) {
 function transposed(params) {
     let k = 0;
     const tweenSquarsePosition = [];
+    const newList = [];
+    for (let i = 0; i < params.shape[0]; i++) {
+        for (let j = 0; j < params.shape[1]; j++) {
+            let index = params.shape[0]*j + i;
+            newList[index] = params.list[k];
+            k++;
+        }
+    }
+    params.list = newList;
+    params.shape = [params.shape[1], params.shape[0]];
+}
+
+
+function separate(params, pad = [0, 0]) {
+    let k = 0;
+    const tweenSquarsePosition = [];
     for (let i = 0; i < params.shape[0]; i++) {
         for (let j = 0; j < params.shape[1]; j++) {
             let tweenObj = new TWEEN.Tween(params.list[k].position).to({
-                x: i * params.style.size - params.style.startPoint[0],
-                y: params.style.startPoint[1] - j * params.style.size,
+                x: j * (params.style.size + pad[0]) - params.style.startPoint[0],
+                y: params.style.startPoint[1] - i * (params.style.size + pad[1]),
                 z: 0
-            }, 4000).easing(TWEEN.Easing.Exponential.InOut);
+            }, 1000).easing(TWEEN.Easing.Exponential.InOut);
             tweenSquarsePosition.push(tweenObj);
             k++;
         }
@@ -58,16 +91,16 @@ function transposed(params) {
     return tweenSquarsePosition;
 }
 
-function separate(params, pad = [0, 0]) {
+function plainX(params) {
     let k = 0;
     const tweenSquarsePosition = [];
     for (let i = 0; i < params.shape[0]; i++) {
         for (let j = 0; j < params.shape[1]; j++) {
             let tweenObj = new TWEEN.Tween(params.list[k].position).to({
-                x: j * (params.style.size + pad[0]) - params.style.startPoint[0],
-                y: params.style.startPoint[1] - i * (params.style.size + pad[1]),
+                x: j * params.style.size - params.style.startPoint[0],
+                y: params.style.startPoint[1],
                 z: 0
-            }, 2000).easing(TWEEN.Easing.Exponential.InOut);
+            }, 1000).easing(TWEEN.Easing.Exponential.InOut);
             tweenSquarsePosition.push(tweenObj);
             k++;
         }
@@ -84,17 +117,20 @@ function dot(params, b) {
     const gap = 10;
     const tweenArray = separate(params, [b.params.style.size + gap, 0]);
 
-    const cloneMatrixArray = [];
-    const matrixTransitions = []
-    for (let i = 0; i < params.shape[1]; i++) {
-        cloneMatrixArray[i] = b.clone();
-        cloneMatrixArray[i].setStartPoint([
-            params.style.startPoint[0] - b.params.style.size*(2*i + 1) - gap*i,
+    const cloneMatrix = b.clone(params.shape[1]);
+    cloneMatrix.setStartPoint([
+            params.style.startPoint[0] - b.params.style.size,
             params.style.startPoint[1]
-        ]);
-        matrixTransitions[i] = cloneMatrixArray[i].transposed();
-    }
+    ]);
 
-    tweenArray[0].chain(... matrixTransitions);
+    cloneMatrix.transposed();
+
+    const cloneMatrixSepared = cloneMatrix.separate([b.params.style.size + gap, 0]);
+    const cloneMatrixPlainX = cloneMatrix.plainX();
+    const MatrixSepared2 = plainX(params);
+
+    tweenArray[0].chain(cloneMatrixSepared);
+    cloneMatrixSepared[0].chain(cloneMatrixPlainX, MatrixSepared2);
+
     tweenArray.start();
 }
