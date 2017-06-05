@@ -69,7 +69,7 @@ function transposed(params) {
 }
 
 
-function separate(params, pad = [0, 0]) {
+function separate(params, pad=[0, 0], time=1000) {
     let k = 0;
     const tweenSquarsePosition = [];
     for (let i = 0; i < params.shape[0]; i++) {
@@ -78,7 +78,7 @@ function separate(params, pad = [0, 0]) {
                 x: j * (params.style.size + pad[0]) - params.style.startPoint[0],
                 y: params.style.startPoint[1] - i * (params.style.size + pad[1]),
                 z: 0
-            }, 1000).easing(TWEEN.Easing.Exponential.InOut);
+            }, time).easing(TWEEN.Easing.Exponential.InOut);
             tweenSquarsePosition.push(tweenObj);
             k++;
         }
@@ -91,13 +91,13 @@ function separate(params, pad = [0, 0]) {
     return tweenSquarsePosition;
 }
 
-function plainX(params) {
+function plainX(params,  pad = [0, 0]) {
     let k = 0;
     const tweenSquarsePosition = [];
     for (let i = 0; i < params.shape[0]; i++) {
         for (let j = 0; j < params.shape[1]; j++) {
             let tweenObj = new TWEEN.Tween(params.list[k].position).to({
-                x: j * params.style.size - params.style.startPoint[0],
+                x: j * (params.style.size + pad[0]) - params.style.startPoint[0],
                 y: params.style.startPoint[1],
                 z: 0
             }, 1000).easing(TWEEN.Easing.Exponential.InOut);
@@ -125,12 +125,18 @@ function dot(params, b) {
 
     cloneMatrix.transposed();
 
-    const cloneMatrixSepared = cloneMatrix.separate([b.params.style.size + gap, 0]);
-    const cloneMatrixPlainX = cloneMatrix.plainX();
-    const MatrixSepared2 = plainX(params);
+    const cloneMatrixSepared = cloneMatrix.separate([b.params.style.size + gap, 0], 3000);
+    const cloneMatrixPlainX = cloneMatrix.plainX([b.params.style.size + gap, 0]);
+    const MatrixPlained = plainX(params, [b.params.style.size + gap, 0]);
+
+
+    cloneMatrix.setStartPoint(params.style.startPoint);
+
+    const cloneMatrixPlainXnoGap = cloneMatrix.plainX();
+    const MatrixPlainedNoGap = plainX(params);
 
     tweenArray[0].chain(cloneMatrixSepared);
-    cloneMatrixSepared[0].chain(cloneMatrixPlainX, MatrixSepared2);
-
+    cloneMatrixSepared[0].chain(cloneMatrixPlainX, MatrixPlained);
+    cloneMatrixPlainX[0].chain(cloneMatrixPlainXnoGap, MatrixPlainedNoGap);
     tweenArray.start();
 }

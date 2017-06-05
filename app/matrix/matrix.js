@@ -13,8 +13,8 @@ export default function MatrixGL(features, group, style) {
         clone: n => { return cloneMatrix(features, group, style, n) },
         xLineFormation: () => animation.xLineFormation(params),
         yLineFormation: () => animation.yLineFormation(params),
-        separate: pad => animation.separate(params, pad),
-        plainX: () => animation.plainX(params),
+        separate: ( pad, time ) => animation.separate(params, pad, time),
+        plainX: pad => animation.plainX(params, pad),
 
         setStartPoint: (arr) => {
             if (arr.length === 2) params.style.startPoint = arr;
